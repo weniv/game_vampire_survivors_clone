@@ -100,16 +100,16 @@ public class Character : MonoBehaviour
     public Ctr_Spell Get_Spell_Obj()
     {
         bool spell_Check = false;
-        for (int i = 0; i < GameManager.Instance.Spell_List.Count; i++)
+        for (int i = 0; i < GameManager.Instance.Spell_List.Count; i++) // 저장한 스펠 풀리스트
         {
-            if (!GameManager.Instance.Spell_List[i].gameObject.activeSelf)
+            if (!GameManager.Instance.Spell_List[i].gameObject.activeSelf) // 작동하지 않는 오브젝트 체크
             {
                 spell_Check = true;
                 return GameManager.Instance.Spell_List[i];
             }
         }
 
-        if(!spell_Check)
+        if(!spell_Check) // 오브젝트 못 발견했을 시 생성
         {
             Ctr_Spell t_Spell = Instantiate(GameManager.Instance.DataLoad_Spell_List[0], Vector3.zero, Quaternion.identity).GetComponent<Ctr_Spell>(); // 새로 생성
             t_Spell.transform.parent = GameManager.Instance.PoolManager.Spell; // 풀 매니저에 등록

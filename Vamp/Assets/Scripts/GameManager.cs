@@ -76,6 +76,9 @@ public partial class GameManager : MonoBehaviour
 
         foreach (Ctr_Spell t in Spell_List)
             t.gameObject.SetActive(false);
+
+        foreach(GameObject t in Effect_List)
+            t.gameObject.SetActive(false);
     }
 
     /// <summary>
@@ -84,7 +87,11 @@ public partial class GameManager : MonoBehaviour
     public void Btn_Play()
     {
         UIManager.Instance.Game_Start.SetActive(false);
+        UIManager.Instance.Game_End.SetActive(false);
         Player.Init(1); // 1레벨로 초기화
+        Btn_Init();
+        Player.transform.position = Vector3.zero;
+        Player.gameObject.SetActive(true);
         m_Stage_Info.Monster_Spawn_Time.Current = m_Stage_Info.Monster_Spawn_Time.Destiantion - 2f; // 처음에는 2초 후 생성
         m_Stage_Info.Game_State = Game_State.Play;
     }
@@ -92,6 +99,7 @@ public partial class GameManager : MonoBehaviour
     public void GameOver()
     {
         m_Stage_Info.Game_State = Game_State.GameOver;
+        UIManager.Instance.Game_End.SetActive(true);
     }
 
     // Update is called once per frame
