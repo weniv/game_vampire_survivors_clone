@@ -55,6 +55,9 @@ public partial class GameManager : MonoBehaviour
             Effect_List.Add(t_Effect);
         }
 
+        UIManager.Instance.Game_Start.SetActive(true);
+        UIManager.Instance.Game_Ing.SetActive(false);
+        UIManager.Instance.Game_End.SetActive(false);
         Btn_Init(); // 첫 한번 게임 초기화
     }
 
@@ -68,6 +71,8 @@ public partial class GameManager : MonoBehaviour
         m_Stage_Info.Game_State = Game_State.Ready;
         m_Stage_Info.Level = 1;
         m_Stage_Info.Monster_Count = 3;
+        m_Stage_Info.Monster_Death_Count = 0;
+        m_Stage_Info.Timer = 0f;
         m_Stage_Info.Monster_Spawn_Time.Set(10f);
 
         // 오브젝트 풀 초기화
@@ -77,7 +82,7 @@ public partial class GameManager : MonoBehaviour
         foreach (Ctr_Spell t in Spell_List)
             t.gameObject.SetActive(false);
 
-        foreach(GameObject t in Effect_List)
+        foreach (GameObject t in Effect_List)
             t.gameObject.SetActive(false);
     }
 
@@ -87,6 +92,7 @@ public partial class GameManager : MonoBehaviour
     public void Btn_Play()
     {
         UIManager.Instance.Game_Start.SetActive(false);
+        UIManager.Instance.Game_Ing.SetActive(true);
         UIManager.Instance.Game_End.SetActive(false);
         Player.Init(1); // 1레벨로 초기화
         Btn_Init();
@@ -99,6 +105,9 @@ public partial class GameManager : MonoBehaviour
     public void GameOver()
     {
         m_Stage_Info.Game_State = Game_State.GameOver;
+        UIManager.Instance.Game_Ing.SetActive(false);
+        UIManager.Instance.Text_Game_Result.text = "Time : " + System.TimeSpan.FromSeconds(m_Stage_Info.Timer).ToString("hh':'mm':'ss") + "\n" +
+                                                    "Monster Kill : " + m_Stage_Info.Monster_Death_Count; // 결과창 UI 표시
         UIManager.Instance.Game_End.SetActive(true);
     }
 
@@ -114,6 +123,9 @@ public partial class GameManager : MonoBehaviour
             }
             else
                 m_Stage_Info.Monster_Spawn_Time.Current += Time.deltaTime; // 소환 시간 증가
+
+            m_Stage_Info.Timer += Time.deltaTime;
+            UIManager.Instance.Text_Timer.text = System.TimeSpan.FromSeconds(m_Stage_Info.Timer).ToString("hh':'mm':'ss"); // 진행 시간 표시
         }
     }
 
@@ -166,7 +178,7 @@ public partial class GameManager : MonoBehaviour
 
         // 한 번 스폰 시 몬스터 숫자 및 레벨 업그레이드
         m_Stage_Info.Idx += 1;
-        if(m_Stage_Info.Idx >= DataLoad_Enemy_List.Length)
+        if (m_Stage_Info.Idx >= DataLoad_Enemy_List.Length)
             m_Stage_Info.Idx = 0;
         m_Stage_Info.Level += 1;
         m_Stage_Info.Monster_Count += m_Stage_Info.Level * 2;
@@ -176,9 +188,9 @@ public partial class GameManager : MonoBehaviour
     public void Show_Effect(Vector3 pos)
     {
         bool find = false;
-        for(int i = 0 ; i < Effect_List.Count ; i++)
+        for (int i = 0; i < Effect_List.Count; i++)
         {
-            if(!Effect_List[i].activeSelf)
+            if (!Effect_List[i].activeSelf)
             {
                 find = true;
                 Effect_List[i].transform.position = pos;
@@ -187,7 +199,7 @@ public partial class GameManager : MonoBehaviour
             }
         }
 
-        if(!find)
+        if (!find)
         {
             GameObject t_Effect = Instantiate(DataLoad_Effect_List[0], Vector3.zero, Quaternion.identity);
             t_Effect.transform.parent = PoolManager.Effect;

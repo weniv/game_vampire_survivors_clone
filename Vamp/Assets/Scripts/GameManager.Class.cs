@@ -20,6 +20,8 @@ public partial class GameManager : MonoBehaviour
         public int Idx = 0; // 소환하는 몬스터 인덱스
         public int Level = 1; // 레벨
         public int Monster_Count = 10; // 몬스터 숫자
+        public int Monster_Death_Count = 0; // 죽은 몬스터 숫자
+        public float Timer = 0f; // 현재 시간 표시
         public float Witdh = 20f; // 화면 최대 넓이
         public float Height = 20f; // 화면 최대 높이
         public Time_Checker<float> Monster_Spawn_Time = new Time_Checker<float>(); // 몬스터 스폰 시간

@@ -46,4 +46,10 @@ public class Ctr_Enemy : Character
             }
         }
     }
+
+    public override void Death()
+    {
+        base.Death();
+        GameManager.Instance.m_Stage_Info.Monster_Death_Count += 1; // 몬스터 죽었을 때 숫자 업
+    }
 }
