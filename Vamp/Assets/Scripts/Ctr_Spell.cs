@@ -5,6 +5,7 @@ using UnityEngine;
 public class Ctr_Spell : Character
 {
     public Character Target;
+    public int Idx; // 스펠 구분
     public Spell m_Spell; // 스펠 속성
     public Character Spawn_Character; // 소환한 캐릭터
     // Start is called before the first frame update
@@ -30,6 +31,8 @@ public class Ctr_Spell : Character
                         this.transform.position = Vector3.MoveTowards(this.transform.position, Target.transform.position, Time.deltaTime * m_Spell.Move_Speed * 3f);
                     else // 없으면 방향대로
                         this.transform.position = Vector3.MoveTowards(this.transform.position, this.transform.position + m_Spell.Direction, Time.deltaTime * m_Spell.Move_Speed);
+                    break;
+                case Spell_Type.Shield_Damage:
                     break;
             }
         }
@@ -60,7 +63,8 @@ public class Ctr_Spell : Character
     /// </summary>
     private void OnEnable()
     {
-        StartCoroutine(Active_Off());
+        if(m_Spell.Destroy_Time)
+            StartCoroutine(Active_Off());
     }
 
     /// <summary>
@@ -70,7 +74,7 @@ public class Ctr_Spell : Character
     IEnumerator Active_Off()
     {
         Target = null; // 타겟 초기화
-        this.transform.GetChild(0).gameObject.SetActive(true); // 충돌범위 찾기 켜기
+        this.transform.GetChild(0).gameObject.SetActive(true); // 찾기 범위 켜기
         yield return new WaitForSeconds(3.0f);
         this.gameObject.SetActive(false);
     }

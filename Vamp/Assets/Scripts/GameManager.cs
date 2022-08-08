@@ -44,15 +44,25 @@ public partial class GameManager : MonoBehaviour
             t_Enemy.gameObject.SetActive(false);
             Enemy_List.Add(t_Enemy);
 
-            Ctr_Spell t_Spell = Instantiate(DataLoad_Spell_List[0], Vector3.zero, Quaternion.identity).GetComponent<Ctr_Spell>(); // 새로 생성
-            t_Spell.transform.parent = PoolManager.Spell; // 풀 매니저에 등록
-            t_Spell.gameObject.SetActive(false);
-            Spell_List.Add(t_Spell);
+          
 
             GameObject t_Effect = Instantiate(DataLoad_Effect_List[0], Vector3.zero, Quaternion.identity);
             t_Effect.transform.parent = PoolManager.Effect;
             t_Effect.SetActive(false);
             Effect_List.Add(t_Effect);
+        }
+
+        // 미리 풀링
+        for (int i = 0; i < 10; i++)
+        {
+            for (int sub_i = 0; sub_i < DataLoad_Spell_List.Length; sub_i++)
+            {
+                Ctr_Spell t_Spell = Instantiate(DataLoad_Spell_List[sub_i], Vector3.zero, Quaternion.identity).GetComponent<Ctr_Spell>(); // 새로 생성
+                t_Spell.Idx = sub_i;
+                t_Spell.transform.parent = PoolManager.Spell; // 풀 매니저에 등록
+                t_Spell.gameObject.SetActive(false);
+                Spell_List.Add(t_Spell);
+            }
         }
 
         UIManager.Instance.Game_Start.SetActive(true);
@@ -80,7 +90,10 @@ public partial class GameManager : MonoBehaviour
             t.gameObject.SetActive(false);
 
         foreach (Ctr_Spell t in Spell_List)
+        {
+            t.transform.parent = PoolManager.Spell; // 부모 이동
             t.gameObject.SetActive(false);
+        }
 
         foreach (GameObject t in Effect_List)
             t.gameObject.SetActive(false);
@@ -100,6 +113,8 @@ public partial class GameManager : MonoBehaviour
         Player.gameObject.SetActive(true);
         m_Stage_Info.Monster_Spawn_Time.Current = m_Stage_Info.Monster_Spawn_Time.Destiantion - 2f; // 처음에는 2초 후 생성
         m_Stage_Info.Game_State = Game_State.Play;
+
+        Player.Spawn_Spell(Character.Spell_Type.Shield_Damage); // 보여주기 위한 쉴드
     }
 
     public void GameOver()

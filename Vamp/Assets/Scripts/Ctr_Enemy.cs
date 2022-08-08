@@ -42,7 +42,7 @@ public class Ctr_Enemy : Character
             if (other.GetComponent<Ctr_Spell>().Spawn_Character.tag == "Player") // 소환한 캐릭터가 플레이어인 경우
             {
                 Get_Damage(other.GetComponent<Ctr_Spell>().Spawn_Character.m_Stat.Damage);
-                other.gameObject.SetActive(!other.GetComponent<Ctr_Spell>().m_Spell.Destroy); // 파괴되는 거면 파괴
+                other.gameObject.SetActive(!other.GetComponent<Ctr_Spell>().m_Spell.Destroy_Hitted); // 파괴되는 거면 파괴
             }
         }
     }
@@ -51,5 +51,17 @@ public class Ctr_Enemy : Character
     {
         base.Death();
         GameManager.Instance.m_Stage_Info.Monster_Death_Count += 1; // 몬스터 죽었을 때 숫자 업
+        Drop_Item();
+    }
+
+    /// <summary>
+    /// 몬스터 드랍 아이템
+    /// </summary>
+    public void Drop_Item()
+    {
+        if(UnityEngine.Random.Range(0, 11) < 3f) // 30% 이하일 경우 드랍
+        {
+            
+        }
     }
 }

@@ -31,29 +31,33 @@ public class Character : MonoBehaviour
         Normal_Attack, // 기본 공격
         Normal_Bullet, // 기본 총알
         Guided_Bullet, // 유도 총알
+        Shield_Damage, // 대미지 쉴드
     }
 
     [Serializable]
     public class Spell
     {
+        public int Idx = 0;
         public Spell_Type Type = Spell_Type.Normal_Attack; // 스펠 종류
         public int Damage; // 대미지
         public Vector3 Direction; // 방향
-        public bool Destroy = false; // 충돌 시 파괴 여부
+        public bool Destroy_Time = true; // 시간 지난 후 파괴 여부
+        public bool Destroy_Hitted = false; // 충돌 시 파괴 여부
         public float Move_Speed = 3.0f; // 스펠 이동 속도
         public Time_Checker<float> Speed = new Time_Checker<float>(); // 스펠 시전 간격
 
         public Spell() // 기본 초기화
         {
             Type = Spell_Type.Normal_Attack;
-            Destroy = false;
+            Destroy_Hitted = false;
+            Destroy_Time = true;
             Speed.Set(1.0f);
         }
 
         public void Set(Spell_Type type, int damage, bool destroy, float speed) // 스펠 세팅
         {
             Type = type;
-            Destroy = destroy;
+            Destroy_Hitted = destroy;
             Speed.Set(speed);
         }
     }
@@ -97,21 +101,28 @@ public class Character : MonoBehaviour
     /// 사용하지 않는 스펠 오브젝트 획득
     /// </summary>
     /// <returns></returns>
-    public Ctr_Spell Get_Spell_Obj()
+    public Ctr_Spell Get_Spell_Obj(int idx, Character character, Spell_Type type)
     {
         bool spell_Check = false;
         for (int i = 0; i < GameManager.Instance.Spell_List.Count; i++) // 저장한 스펠 풀리스트
         {
-            if (!GameManager.Instance.Spell_List[i].gameObject.activeSelf) // 작동하지 않는 오브젝트 체크
+            if (!GameManager.Instance.Spell_List[i].gameObject.activeSelf && GameManager.Instance.Spell_List[i].Idx == idx) // 작동하지 않는 오브젝트 체크
             {
                 spell_Check = true;
+                GameManager.Instance.Spell_List[i].Spawn_Character = character;
+                GameManager.Instance.Spell_List[i].m_Spell = new Spell();
+                GameManager.Instance.Spell_List[i].m_Spell.Type = type;
                 return GameManager.Instance.Spell_List[i];
             }
         }
 
-        if(!spell_Check) // 오브젝트 못 발견했을 시 생성
+        if (!spell_Check) // 오브젝트 못 발견했을 시 생성
         {
-            Ctr_Spell t_Spell = Instantiate(GameManager.Instance.DataLoad_Spell_List[0], Vector3.zero, Quaternion.identity).GetComponent<Ctr_Spell>(); // 새로 생성
+            Ctr_Spell t_Spell = Instantiate(GameManager.Instance.DataLoad_Spell_List[idx], Vector3.zero, Quaternion.identity).GetComponent<Ctr_Spell>(); // 새로 생성
+            t_Spell.Spawn_Character = character;
+            t_Spell.Idx = idx;
+            t_Spell.m_Spell = new Spell();
+            t_Spell.m_Spell.Type = type;
             t_Spell.transform.parent = GameManager.Instance.PoolManager.Spell; // 풀 매니저에 등록
             t_Spell.gameObject.SetActive(false);
             GameManager.Instance.Spell_List.Add(t_Spell);

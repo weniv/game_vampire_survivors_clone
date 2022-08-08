@@ -26,7 +26,7 @@ public class Ctr_Player : Character
         m_Stat.Spell_List.Add(basic_Spell);
         basic_Spell = new Spell();
         basic_Spell.Set(Spell_Type.Guided_Bullet, m_Stat.Damage, true, 0.5f);
-        m_Stat.Spell_List.Add(basic_Spell);
+        m_Stat.Spell_List.Add(basic_Spell);        
         this.transform.position = Vector3.zero;
     }
 
@@ -62,7 +62,7 @@ public class Ctr_Player : Character
                     t.Speed.Current += Time.deltaTime;
             }
 
-            if(mov_Pos.x != 0f)
+            if (mov_Pos.x != 0f)
                 this.transform.right = mov_Pos.x > 0 ? Vector3.left : Vector3.right;
         }
     }
@@ -74,34 +74,44 @@ public class Ctr_Player : Character
     public override void Spawn_Spell(Spell_Type type)
     {
         base.Spawn_Spell(type);
-        Ctr_Spell t = Get_Spell_Obj(); // 풀링에서 스펠 획득
-        t.Spawn_Character = this; // 소환자 등록
-        t.m_Spell = new Spell();
-        t.m_Spell.Type = type;
+        Ctr_Spell t = null;
 
         switch (type) // 타입에 따라 분류
         {
             case Spell_Type.Normal_Attack:
+                t = Get_Spell_Obj(0, this, type); // 풀링에서 스펠 획득
                 t.m_Spell.Damage = m_Stat.Damage;
                 t.m_Spell.Direction = Vector3.zero;
-                t.m_Spell.Destroy = false;
+                t.m_Spell.Destroy_Hitted = false;
+                t.m_Spell.Destroy_Time = true;
                 t.m_Spell.Move_Speed = 0.0f;
                 break;
             case Spell_Type.Normal_Bullet:
+                t = Get_Spell_Obj(0, this, type);
                 t.m_Spell.Damage = m_Stat.Damage;
                 t.m_Spell.Direction = this.transform.up;
-                t.m_Spell.Destroy = true;
+                t.m_Spell.Destroy_Hitted = true;
+                t.m_Spell.Destroy_Time = true;
                 t.m_Spell.Move_Speed = 1.0f;
-                t.GetComponent<SpriteRenderer>().sprite = GameManager.Instance.Main_Atlas.GetSprite("bullet");
                 break;
             case Spell_Type.Guided_Bullet:
-                t.m_Spell.Destroy = true;
+                t = Get_Spell_Obj(1, this, type);
+                t.m_Spell.Destroy_Hitted = true;
+                t.m_Spell.Destroy_Time = true;
                 t.m_Spell.Damage = m_Stat.Damage;
                 Vector2 t_Pos = Random.insideUnitCircle;
                 t.m_Spell.Direction = new Vector3(t_Pos.x, t_Pos.y, 0);
                 t.m_Spell.Move_Speed = 0.3f;
-                 t.GetComponent<SpriteRenderer>().sprite = GameManager.Instance.Main_Atlas.GetSprite("bulle-2t");
                 //t.Find_Target();
+                break;
+            case Spell_Type.Shield_Damage:
+                t = Get_Spell_Obj(2, this, type);
+                t.m_Spell.Damage = m_Stat.Damage;
+                t.m_Spell.Direction = Vector3.zero;
+                t.m_Spell.Destroy_Hitted = false;
+                t.m_Spell.Destroy_Time = false;
+                t.m_Spell.Move_Speed = 0.0f;
+                t.transform.parent = this.transform;
                 break;
         }
 
@@ -138,14 +148,14 @@ public class Ctr_Player : Character
     /// <param name="item"></param>
     void Get_Item(Ctr_Item.Item item)
     {
-        switch(item.Specify)
+        switch (item.Specify)
         {
             case Ctr_Item.Specify.Heal:
                 m_Stat.Hp += item.Value; // HP 회복
-            break;
+                break;
             case Ctr_Item.Specify.LevelUp:
                 Init(m_Stat.Level + 1); // 레벨 업
-            break;
+                break;
         }
     }
 
@@ -174,11 +184,11 @@ public class Ctr_Player : Character
             if (other.GetComponent<Ctr_Spell>().Spawn_Character.tag == "Enemy") // 소환한 캐릭터가 적인 경우
             {
                 Get_Damage(other.GetComponent<Ctr_Spell>().Spawn_Character.m_Stat.Damage);
-                other.gameObject.SetActive(!other.GetComponent<Ctr_Spell>().m_Spell.Destroy); // 파괴되는 거면 파괴
+                other.gameObject.SetActive(!other.GetComponent<Ctr_Spell>().m_Spell.Destroy_Hitted); // 파괴되는 거면 파괴
             }
         }
 
-        if(other.tag == "Item") // 아이템과 충돌
+        if (other.tag == "Item") // 아이템과 충돌
         {
             Get_Item(other.GetComponent<Ctr_Item>().m_Item); // 아이템 획득
             other.gameObject.SetActive(false);
